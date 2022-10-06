@@ -1,0 +1,21 @@
+[
+    {
+        "id" : "101",
+        "name" : "Amal",
+        "number" : "0001111",
+        "place" : "calicut"
+    },
+    {
+        "id" : "102",
+        "name" : "Shimna",
+        "number" : "00012222",
+        "place" : "vadakara"
+    },
+    {
+        "id" : "103",
+        "name" : "Jishnu",
+        "number" : "00113333",
+        "place" : "kannur"
+
+    }
+]
