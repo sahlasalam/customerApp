@@ -7,20 +7,34 @@ app.use(bodypars.json())
 // const customer = require("./customer.json")
 const db= require("./config/db");
 const User = require('./models/user') 
+const bcrypt= require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 
 db();
 
+const JWT_SECRET= "mkjhewywifjpoaxYTwwwdkxuhdi";
 
 app.post('/save', async (req, res) =>{
+
+  var hashedPassword = bcrypt.hashSync(req.body.password,10)
+
   try{
     User.findOne({id: req.body.id}, async function(err, log){
       if(log){
         res.send({status : 0, message : "Customer already exist"})
       }else{
-          var new_user = new User(req.body);
+          var user={
+            id : req.body.id,
+            name : req.body.name,
+            password : hashedPassword,
+            number : req.body.number,
+            place : req.body.place
+          }
+          var new_user = new User(user);
           new_user.save( async function(err, log){
-            res.send({status : 1, message : "Successfuly registered"})
+            var token = jwt.sign({id: log._id}, JWT_SECRET)
+            res.send({status : 1, message : "Successfuly registered", token : token})
           }  )
       }
     })
@@ -47,13 +61,19 @@ app.post('/save', async (req, res) =>{
 
 app.post('/customer/details', async (req , res) =>{
   try{
+      console.log(req.body);
       let inputId= req.body.id;
       let data= await User.findOne({id : inputId})
       if(!data){
         res.send({status : 0 , message : "customer not exist"})
-      }else{
-        res.send({status : 1, output : data});
       }
+      let isPasswordMatched = await bcrypt.compare(req.body.password, data.password)
+      if(!isPasswordMatched ){
+        res.send({status : 0 , message : "Incorrect password"})
+      }
+      var token= jwt.sign({id : data._id}, JWT_SECRET)
+      res.send({status : 1, output : data, token : token});
+      console.log(data);
   }
   catch(error){
     console.log(error);
